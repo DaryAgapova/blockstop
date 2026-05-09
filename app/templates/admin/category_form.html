@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{% if category %}Редактировать категорию{% else %}Добавить категорию{% endif %} — Панель{% endblock %}
+{% block content %}
+<div class="page-header admin-header">
+  <div class="container">
+    <h1 class="page-title">{% if category %}Редактировать категорию{% else %}Добавить категорию{% endif %}</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post" action="{{ url_for('admin.category_edit', cat_id=category.id) if category else url_for('admin.category_new') }}">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Название *</label>
+                <input type="text" name="name" class="form-control" value="{{ category.name if category else '' }}" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Slug *</label>
+                <input type="text" name="slug" class="form-control" value="{{ category.slug if category else '' }}" required placeholder="protivopozharnye-dveri">
+                <small class="text-muted">Латинские буквы, цифры, дефисы. Используется в URL.</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Иконка FontAwesome</label>
+                <div class="input-group">
+                  <span class="input-group-text" id="iconPreview"><i class="fas fa-fire" id="iconEl"></i></span>
+                  <input type="text" name="icon" id="iconInput" class="form-control" value="{{ category.icon if category else 'fire' }}" placeholder="fire-extinguisher">
+                </div>
+                <small class="text-muted"><a href="https://fontawesome.com/icons" target="_blank">Список иконок FA</a></small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Порядок отображения</label>
+                <input type="number" name="sort_order" class="form-control" value="{{ category.sort_order if category else 0 }}" min="0">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Описание</label>
+                <textarea name="description" class="form-control" rows="3">{{ category.description if category else '' }}</textarea>
+              </div>
+              <div class="col-12 d-flex gap-3">
+                <button type="submit" class="btn btn-danger px-4"><i class="fas fa-save me-2"></i>Сохранить</button>
+                <a href="{{ url_for('admin.categories') }}" class="btn btn-outline-secondary">Отмена</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% block extra_js %}
+<script>
+document.getElementById('iconInput').addEventListener('input', function() {
+  document.getElementById('iconEl').className = 'fas fa-' + this.value;
+});
+</script>
+{% endblock %}
+{% endblock %}

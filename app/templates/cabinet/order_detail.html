@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('cabinet.orders') }}">Мои заказы</a></li>
+        <li class="breadcrumb-item active">Заказ #{{ order.id }}</li>
+      </ol>
+    </nav>
+    <h1 class="page-title">Заказ #{{ order.id }}</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Status timeline -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Статус заказа</h5>
+            <span class="badge bg-{{ order.status_color }} fs-6">{{ order.status_label }}</span>
+          </div>
+          <div class="order-timeline">
+            {% set statuses = [('new','Новая'),('moderation','Проверка'),('approved','Одобрена'),('invoice_sent','Счёт выставлен'),('paid','Оплачено'),('completed','Выполнено')] %}
+            {% set status_list = ['new','moderation','approved','invoice_sent','paid','completed'] %}
+            {% set cur_idx = status_list.index(order.status) if order.status in status_list else -1 %}
+            {% for s, label in statuses %}
+            {% set idx = loop.index0 %}
+            <div class="timeline-step {% if idx <= cur_idx %}done{% endif %} {% if idx == cur_idx %}current{% endif %}">
+              <div class="timeline-dot"></div>
+              <div class="timeline-label">{{ label }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          {% if order.manager_comment %}
+          <div class="alert alert-info mt-3 mb-0">
+            <strong><i class="fas fa-comment me-2"></i>Комментарий менеджера:</strong><br>
+            {{ order.manager_comment }}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Items -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0">Состав заказа</h5></div>
+        <div class="table-responsive">
+          <table class="table mb-0">
+            <thead><tr><th>Товар</th><th class="text-center">Кол-во</th><th>Ед.</th><th class="text-end">Цена</th><th class="text-end">Сумма</th></tr></thead>
+            <tbody>
+              {% for item in order.items %}
+              <tr>
+                <td>{{ item.product_name }}</td>
+                <td class="text-center">{{ item.quantity }}</td>
+                <td>{{ item.product_unit }}</td>
+                <td class="text-end">{% if item.price_at_order %}{{ item.price_at_order | money }}{% else %}По запросу{% endif %}</td>
+                <td class="text-end fw-semibold">{{ item.subtotal_display }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot>
+              <tr class="table-light">
+                <td colspan="4" class="text-end fw-bold">Итого:</td>
+                <td class="text-end fw-bold text-danger fs-5">{{ order.total_display }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      {% if order.comment %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <strong><i class="fas fa-comment me-2"></i>Ваш комментарий:</strong>
+          <p class="mb-0 mt-2 text-muted">{{ order.comment }}</p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <!-- Invoice block -->
+      <div class="card shadow-sm mb-3 {% if order.invoice_pdf_filename %}border-primary{% endif %}">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Счёт на оплату</h5>
+        </div>
+        <div class="card-body text-center">
+          {% if order.invoice_pdf_filename %}
+          <div class="mb-3">
+            <i class="fas fa-file-pdf fa-4x text-danger"></i>
+          </div>
+          <p class="text-success mb-3"><i class="fas fa-check-circle me-1"></i>Счёт сформирован менеджером</p>
+          <a href="{{ url_for('cabinet.download_invoice', order_id=order.id) }}" class="btn btn-primary w-100">
+            <i class="fas fa-download me-2"></i>Скачать PDF
+          </a>
+          {% else %}
+          <div class="mb-3">
+            <i class="fas fa-clock fa-4x text-muted"></i>
+          </div>
+          <p class="text-muted">Счёт будет сформирован менеджером после проверки заявки</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Order info -->
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Информация</h5></div>
+        <div class="card-body">
+          <div class="meta-row"><span>Дата заявки:</span> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          <div class="meta-row"><span>Обновлено:</span> {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          <div class="meta-row"><span>Контакт:</span> {{ order.client_phone or '—' }}</div>
+          {% if order.client_company %}<div class="meta-row"><span>Организация:</span> {{ order.client_company }}</div>{% endif %}
+          {% if order.client_inn %}<div class="meta-row"><span>ИНН:</span> {{ order.client_inn }}</div>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

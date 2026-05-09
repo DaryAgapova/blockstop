@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+db.sqlite3
+app/static/uploads/
+app/static/fonts/
+*.zip
+.DS_Store

@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container hero-content">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="hero-badge"><i class="fas fa-shield-alt me-2"></i>Лицензия МЧС № ЦЛ-5-2/00163</div>
+        <h1 class="hero-title">
+          Пожарная безопасность<br>
+          <span class="text-danger">— наш приоритет</span>
+        </h1>
+        <p class="hero-subtitle">
+          Официальный поставщик противопожарного оборудования в Волгограде и области.
+          Более 12 лет опыта, сертифицированная продукция, монтаж и обслуживание.
+        </p>
+        <div class="hero-actions">
+          <a href="{{ url_for('main.catalog') }}" class="btn btn-danger btn-lg px-4">
+            <i class="fas fa-th-large me-2"></i>Перейти в каталог
+          </a>
+          <a href="{{ url_for('main.contacts') }}" class="btn btn-outline-light btn-lg px-4">
+            <i class="fas fa-phone me-2"></i>Связаться с нами
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><span>12+</span><small>лет на рынке</small></div>
+          <div class="hero-stat"><span>500+</span><small>позиций в каталоге</small></div>
+          <div class="hero-stat"><span>1000+</span><small>выполненных заказов</small></div>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-flex justify-content-center">
+        <div class="hero-icon-block">
+          <i class="fas fa-fire-extinguisher hero-big-icon"></i>
+          <div class="hero-icon-ring ring-1"></div>
+          <div class="hero-icon-ring ring-2"></div>
+          <div class="hero-icon-ring ring-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-wave">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none">
+      <path d="M0,64L60,58.7C120,53,240,43,360,48C480,53,600,75,720,74.7C840,75,960,53,1080,42.7C1200,32,1320,43,1380,48L1440,53L1440,80L0,80Z" fill="#f8f9fa"/>
+    </svg>
+  </div>
+</section>
+
+<!-- Features strip -->
+<section class="features-strip">
+  <div class="container">
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <div class="feature-chip">
+          <i class="fas fa-certificate"></i>
+          <span>Сертифицированная продукция</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="feature-chip">
+          <i class="fas fa-truck"></i>
+          <span>Доставка по Волгоградской области</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="feature-chip">
+          <i class="fas fa-tools"></i>
+          <span>Монтаж и техобслуживание</span>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="feature-chip">
+          <i class="fas fa-headset"></i>
+          <span>Консультация специалиста</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories -->
+<section class="section-categories py-5">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <div class="section-tag">Каталог продукции</div>
+      <h2 class="section-title">Все категории товаров</h2>
+      <p class="section-subtitle">Полный ассортимент противопожарного оборудования для организаций и частных лиц</p>
+    </div>
+    <div class="row g-3">
+      {% for cat in categories %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="{{ url_for('main.catalog', cat=cat.slug) }}" class="category-card">
+          <div class="category-card-icon">
+            <i class="fas fa-{{ cat.icon }}"></i>
+          </div>
+          <div class="category-card-name">{{ cat.name }}</div>
+          <div class="category-card-count">
+            {{ cat.products.count() }} товаров
+          </div>
+          <div class="category-card-arrow"><i class="fas fa-arrow-right"></i></div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-4">
+      <a href="{{ url_for('main.catalog') }}" class="btn btn-outline-danger px-4">
+        <i class="fas fa-th me-2"></i>Весь каталог
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Featured products -->
+{% if featured %}
+<section class="section-featured py-5 bg-light">
+  <div class="container">
+    <div class="section-header text-center mb-5">
+      <div class="section-tag">Популярное</div>
+      <h2 class="section-title">Рекомендуемые товары</h2>
+    </div>
+    <div class="row g-4">
+      {% for p in featured %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="product-card">
+          <a href="{{ url_for('main.product', product_id=p.id) }}" class="product-card-img-link">
+            {% if p.image_filename %}
+            <img src="{{ url_for('main.uploaded_file', filename=p.image_filename) }}" alt="{{ p.name }}" class="product-card-img">
+            {% else %}
+            <div class="product-card-img-placeholder">
+              <i class="fas fa-fire-extinguisher"></i>
+            </div>
+            {% endif %}
+            {% if p.featured %}<span class="product-badge badge-featured">Хит</span>{% endif %}
+            {% if not p.in_stock %}<span class="product-badge badge-oos">Нет в наличии</span>{% endif %}
+          </a>
+          <div class="product-card-body">
+            <div class="product-card-cat">{{ p.category.name }}</div>
+            <a href="{{ url_for('main.product', product_id=p.id) }}" class="product-card-name">{{ p.name }}</a>
+            <div class="product-card-footer">
+              <div class="product-card-price">{{ p.price_display }}</div>
+              {% if p.in_stock %}
+              <form method="post" action="{{ url_for('main.cart_add', product_id=p.id) }}">
+                <input type="hidden" name="qty" value="1">
+                <input type="hidden" name="next" value="{{ request.url }}">
+                <button type="submit" class="btn-cart" title="В корзину">
+                  <i class="fas fa-cart-plus"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Why us -->
+<section class="section-why py-5">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <div class="section-tag">Почему мы</div>
+        <h2 class="section-title mb-4">Надёжный партнёр в сфере пожарной безопасности</h2>
+        <div class="why-item">
+          <div class="why-icon"><i class="fas fa-award"></i></div>
+          <div>
+            <h6>Официальные поставки</h6>
+            <p>Работаем напрямую с производителями, вся продукция имеет сертификаты соответствия.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon"><i class="fas fa-calculator"></i></div>
+          <div>
+            <h6>Индивидуальные цены</h6>
+            <p>Рассчитываем стоимость под конкретный объект. Оптовые условия для партнёров.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon"><i class="fas fa-hard-hat"></i></div>
+          <div>
+            <h6>Монтаж и обслуживание</h6>
+            <p>Выполняем установку и техническое обслуживание противопожарного оборудования.</p>
+          </div>
+        </div>
+        <div class="why-item">
+          <div class="why-icon"><i class="fas fa-file-contract"></i></div>
+          <div>
+            <h6>Работаем с юрлицами</h6>
+            <p>Безналичный расчёт, счёт-фактура, накладные. Возможна рассрочка.</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-3">
+          <div class="col-6"><div class="why-card why-card-red"><i class="fas fa-door-open"></i><h5>Противопожарные двери EI-60</h5></div></div>
+          <div class="col-6"><div class="why-card why-card-navy"><i class="fas fa-fire-extinguisher"></i><h5>Огнетушители всех видов</h5></div></div>
+          <div class="col-6"><div class="why-card why-card-navy"><i class="fas fa-tint"></i><h5>Пожарные рукава и стволы</h5></div></div>
+          <div class="col-6"><div class="why-card why-card-red"><i class="fas fa-cabinet-filing"></i><h5>Пожарные шкафы ПШК</h5></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section-cta">
+  <div class="container text-center">
+    <h2 class="cta-title">Нужна консультация?</h2>
+    <p class="cta-sub">Наши специалисты помогут подобрать оборудование и рассчитают стоимость</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="tel:+79178373752" class="btn btn-light btn-lg px-4">
+        <i class="fas fa-phone me-2"></i>8 917 837-37-52
+      </a>
+      <a href="{{ url_for('main.catalog') }}" class="btn btn-outline-light btn-lg px-4">
+        <i class="fas fa-th-large me-2"></i>Каталог товаров
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

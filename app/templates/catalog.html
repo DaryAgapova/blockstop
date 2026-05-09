@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Каталог{% if active_category %} — {{ active_category.name }}{% endif %}{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Главная</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.catalog') }}">Каталог</a></li>
+        {% if active_category %}<li class="breadcrumb-item active">{{ active_category.name }}</li>{% endif %}
+      </ol>
+    </nav>
+    <h1 class="page-title">
+      {% if active_category %}{{ active_category.name }}
+      {% elif search %}Результаты поиска: «{{ search }}»
+      {% else %}Каталог товаров{% endif %}
+    </h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Sidebar -->
+    <div class="col-lg-3">
+      <div class="catalog-sidebar">
+        <!-- Search -->
+        <div class="sidebar-widget">
+          <form method="get" action="{{ url_for('main.catalog') }}">
+            {% if active_category %}<input type="hidden" name="cat" value="{{ active_category.slug }}">{% endif %}
+            <div class="input-group">
+              <input type="text" name="q" class="form-control" placeholder="Поиск товаров…" value="{{ search }}">
+              <button class="btn btn-danger" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+          </form>
+        </div>
+        <!-- Categories -->
+        <div class="sidebar-widget">
+          <h6 class="sidebar-title">Категории</h6>
+          <ul class="sidebar-cat-list">
+            <li>
+              <a href="{{ url_for('main.catalog') }}" class="{% if not active_category %}active{% endif %}">
+                <i class="fas fa-th-large me-2"></i>Все товары
+              </a>
+            </li>
+            {% for cat in categories %}
+            <li>
+              <a href="{{ url_for('main.catalog', cat=cat.slug) }}" class="{% if active_category and active_category.id == cat.id %}active{% endif %}">
+                <i class="fas fa-{{ cat.icon }} me-2"></i>{{ cat.name }}
+                <span class="cat-count">{{ cat.products.count() }}</span>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Products grid -->
+    <div class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted small">Найдено: {{ products.total }} товаров</span>
+      </div>
+
+      {% if products.items %}
+      <div class="row g-4">
+        {% for p in products.items %}
+        <div class="col-6 col-md-4">
+          <div class="product-card h-100">
+            <a href="{{ url_for('main.product', product_id=p.id) }}" class="product-card-img-link">
+              {% if p.image_filename %}
+              <img src="{{ url_for('main.uploaded_file', filename=p.image_filename) }}" alt="{{ p.name }}" class="product-card-img">
+              {% else %}
+              <div class="product-card-img-placeholder">
+                <i class="fas fa-{{ p.category.icon }}"></i>
+              </div>
+              {% endif %}
+              {% if p.featured %}<span class="product-badge badge-featured">Хит</span>{% endif %}
+              {% if not p.in_stock %}<span class="product-badge badge-oos">Нет в наличии</span>{% endif %}
+            </a>
+            <div class="product-card-body">
+              <div class="product-card-cat">{{ p.category.name }}</div>
+              <a href="{{ url_for('main.product', product_id=p.id) }}" class="product-card-name">{{ p.name }}</a>
+              <div class="product-card-footer">
+                <div class="product-card-price">{{ p.price_display }}</div>
+                {% if p.in_stock %}
+                <form method="post" action="{{ url_for('main.cart_add', product_id=p.id) }}">
+                  <input type="hidden" name="qty" value="1">
+                  <input type="hidden" name="next" value="{{ request.url }}">
+                  <button type="submit" class="btn-cart" title="В корзину">
+                    <i class="fas fa-cart-plus"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if products.pages > 1 %}
+      <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+          {% if products.has_prev %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.catalog', cat=active_category.slug if active_category else None, q=search or None, page=products.prev_num) }}">
+              <i class="fas fa-chevron-left"></i>
+            </a>
+          </li>
+          {% endif %}
+          {% for p in products.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+            <li class="page-item {% if p == products.page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for('main.catalog', cat=active_category.slug if active_category else None, q=search or None, page=p) }}">{{ p }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+          {% endfor %}
+          {% if products.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.catalog', cat=active_category.slug if active_category else None, q=search or None, page=products.next_num) }}">
+              <i class="fas fa-chevron-right"></i>
+            </a>
+          </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state text-center py-5">
+        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+        <h5>Товары не найдены</h5>
+        <p class="text-muted">Попробуйте другой запрос или выберите другую категорию</p>
+        <a href="{{ url_for('main.catalog') }}" class="btn btn-danger">Все товары</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

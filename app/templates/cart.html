@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Корзина{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-title"><i class="fas fa-shopping-cart me-2"></i>Корзина</h1>
+  </div>
+</div>
+<div class="container py-4">
+  {% if items %}
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <form method="post" action="{{ url_for('main.cart_update') }}">
+            <table class="table table-cart mb-0">
+              <thead>
+                <tr>
+                  <th>Товар</th>
+                  <th class="text-center">Количество</th>
+                  <th class="text-end">Цена</th>
+                  <th class="text-end">Сумма</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in items %}
+                <tr>
+                  <td>
+                    <div class="cart-product">
+                      {% if item.product.image_filename %}
+                      <img src="{{ url_for('main.uploaded_file', filename=item.product.image_filename) }}" alt="">
+                      {% else %}
+                      <div class="cart-product-icon"><i class="fas fa-{{ item.product.category.icon }}"></i></div>
+                      {% endif %}
+                      <div>
+                        <a href="{{ url_for('main.product', product_id=item.product.id) }}">{{ item.product.name }}</a>
+                        <small class="text-muted d-block">{{ item.product.category.name }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center">
+                    <input type="number" name="qty_{{ item.product.id }}" value="{{ item.qty }}" min="0" max="999" class="form-control form-control-sm qty-field text-center mx-auto" style="width:70px">
+                  </td>
+                  <td class="text-end">{{ item.product.price_display }}</td>
+                  <td class="text-end fw-semibold">
+                    {% if item.subtotal %}{{ item.subtotal | money }}{% else %}По запросу{% endif %}
+                  </td>
+                  <td class="text-center">
+                    <form method="post" action="{{ url_for('main.cart_remove', product_id=item.product.id) }}" style="display:inline">
+                      <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    </form>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <div class="p-3 border-top d-flex justify-content-between">
+              <a href="{{ url_for('main.catalog') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-arrow-left me-1"></i>Продолжить покупки
+              </a>
+              <button type="submit" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-sync me-1"></i>Обновить корзину
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card shadow-sm cart-summary">
+        <div class="card-header"><h5 class="mb-0">Итого</h5></div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-2">
+            <span>Товаров в корзине:</span>
+            <span>{{ items|length }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3 fw-bold fs-5">
+            <span>Сумма:</span>
+            <span class="text-danger">
+              {% if total %}{{ total | money }}{% else %}По запросу{% endif %}
+            </span>
+          </div>
+          <a href="{{ url_for('main.checkout') }}" class="btn btn-danger w-100 btn-lg">
+            <i class="fas fa-clipboard-check me-2"></i>Оформить заявку
+          </a>
+          <p class="text-muted small mt-2 mb-0 text-center">
+            Менеджер свяжется с вами для уточнения деталей
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="empty-state text-center py-5">
+    <i class="fas fa-shopping-cart fa-4x text-muted mb-4"></i>
+    <h4>Корзина пуста</h4>
+    <p class="text-muted">Добавьте товары из каталога</p>
+    <a href="{{ url_for('main.catalog') }}" class="btn btn-danger px-4">
+      <i class="fas fa-th-large me-2"></i>Перейти в каталог
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

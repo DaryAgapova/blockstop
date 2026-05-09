@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}{% if product %}Редактировать товар{% else %}Добавить товар{% endif %} — Панель{% endblock %}
+{% block content %}
+<div class="page-header admin-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('admin.products') }}">Товары</a></li>
+      <li class="breadcrumb-item active">{% if product %}Редактировать{% else %}Добавить{% endif %}</li></ol>
+    </nav>
+    <h1 class="page-title">{% if product %}Редактировать товар{% else %}Добавить товар{% endif %}</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data"
+                action="{{ url_for('admin.product_edit', product_id=product.id) if product else url_for('admin.product_new') }}">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label fw-semibold">Название *</label>
+                <input type="text" name="name" class="form-control" value="{{ product.name if product else '' }}" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Категория *</label>
+                <select name="category_id" class="form-select" required>
+                  <option value="">— Выберите категорию —</option>
+                  {% for cat in categories %}
+                  <option value="{{ cat.id }}" {% if product and product.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Цена (₽)</label>
+                <input type="number" name="price" class="form-control" value="{{ product.price if product and product.price else '' }}" placeholder="Пусто = по запросу" step="0.01" min="0">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-semibold">Единица измерения</label>
+                <input type="text" name="unit" class="form-control" value="{{ product.unit if product else 'шт.' }}">
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Описание</label>
+                <textarea name="description" class="form-control" rows="5">{{ product.description if product else '' }}</textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Изображение</label>
+                {% if product and product.image_filename %}
+                <div class="mb-2">
+                  <img src="{{ url_for('main.uploaded_file', filename=product.image_filename) }}" style="height:100px;border-radius:8px">
+                  <small class="text-muted d-block">Загрузите новое фото, чтобы заменить</small>
+                </div>
+                {% endif %}
+                <input type="file" name="image" class="form-control" accept="image/*">
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input type="checkbox" name="in_stock" class="form-check-input" id="in_stock" {% if not product or product.in_stock %}checked{% endif %}>
+                  <label class="form-check-label" for="in_stock">В наличии</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input type="checkbox" name="featured" class="form-check-input" id="featured" {% if product and product.featured %}checked{% endif %}>
+                  <label class="form-check-label" for="featured"><i class="fas fa-star text-warning me-1"></i>Хит / Рекомендуем</label>
+                </div>
+              </div>
+              <div class="col-12 d-flex gap-3 mt-2">
+                <button type="submit" class="btn btn-danger px-4">
+                  <i class="fas fa-save me-2"></i>{% if product %}Сохранить{% else %}Добавить{% endif %}
+                </button>
+                <a href="{{ url_for('admin.products') }}" class="btn btn-outline-secondary">Отмена</a>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

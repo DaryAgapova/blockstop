@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Оформление заявки{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-title"><i class="fas fa-clipboard-check me-2"></i>Оформление заявки</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-user me-2"></i>Ваши данные</h5>
+        </div>
+        <div class="card-body">
+          {% if not user.inn %}
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Для корректного формирования счёта рекомендуем заполнить <a href="{{ url_for('cabinet.profile') }}">реквизиты в профиле</a>.
+          </div>
+          {% endif %}
+          <form method="post" action="{{ url_for('main.checkout') }}">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">ФИО *</label>
+                <input type="text" class="form-control" value="{{ user.full_name }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Телефон</label>
+                <input type="text" class="form-control" value="{{ user.phone or '' }}" disabled>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email</label>
+                <input type="email" class="form-control" value="{{ user.email }}" disabled>
+              </div>
+              {% if user.company_name %}
+              <div class="col-12">
+                <label class="form-label">Организация</label>
+                <input type="text" class="form-control" value="{{ user.company_name }}" disabled>
+              </div>
+              {% endif %}
+              <div class="col-12 mt-2">
+                <label class="form-label">Комментарий к заявке</label>
+                <textarea name="comment" class="form-control" rows="3" placeholder="Уточнения, вопросы, пожелания…"></textarea>
+              </div>
+              <div class="col-12">
+                <div class="alert alert-light border">
+                  <i class="fas fa-info-circle me-2 text-primary"></i>
+                  Реквизиты для счёта берутся из вашего <a href="{{ url_for('cabinet.profile') }}">профиля</a>.
+                  После оформления менеджер проверит заявку и сформирует счёт на оплату.
+                </div>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-danger btn-lg w-100">
+                  <i class="fas fa-paper-plane me-2"></i>Отправить заявку
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header"><h5 class="mb-0">Ваш заказ</h5></div>
+        <div class="card-body p-0">
+          <ul class="list-group list-group-flush">
+            {% for pid, qty in cart.items() %}
+            {% set p = namespace() %}
+            {# We render this from session — product lookup is done in route #}
+            <li class="list-group-item">Товар #{{ pid }}: {{ qty }} шт.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

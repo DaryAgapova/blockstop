@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block title %}Мои заказы{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1 class="page-title"><i class="fas fa-list me-2"></i>Личный кабинет</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="row g-4">
+    <!-- Sidebar nav -->
+    <div class="col-lg-3">
+      <div class="cabinet-nav">
+        <div class="cabinet-user">
+          <div class="cabinet-avatar"><i class="fas fa-user"></i></div>
+          <div>
+            <div class="fw-semibold">{{ current_user.full_name }}</div>
+            <small class="text-muted">{{ current_user.email }}</small>
+          </div>
+        </div>
+        <ul class="cabinet-menu">
+          <li><a href="{{ url_for('cabinet.orders') }}" class="active"><i class="fas fa-list me-2"></i>Мои заказы</a></li>
+          <li><a href="{{ url_for('cabinet.profile') }}"><i class="fas fa-user-edit me-2"></i>Профиль и реквизиты</a></li>
+          <li><a href="{{ url_for('auth.logout') }}" class="text-danger"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- Orders list -->
+    <div class="col-lg-9">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">Заявки и заказы</h5>
+          <a href="{{ url_for('main.catalog') }}" class="btn btn-danger btn-sm">
+            <i class="fas fa-plus me-1"></i>Новый заказ
+          </a>
+        </div>
+        {% if orders.items %}
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>№</th>
+                <th>Дата</th>
+                <th>Позиций</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Счёт</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for o in orders.items %}
+              <tr>
+                <td><strong>#{{ o.id }}</strong></td>
+                <td>{{ o.created_at.strftime('%d.%m.%Y') }}</td>
+                <td>{{ o.items|length }}</td>
+                <td>{{ o.total_display }}</td>
+                <td><span class="badge bg-{{ o.status_color }}">{{ o.status_label }}</span></td>
+                <td>
+                  {% if o.invoice_pdf_filename %}
+                  <a href="{{ url_for('cabinet.download_invoice', order_id=o.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-file-pdf me-1"></i>Скачать
+                  </a>
+                  {% else %}
+                  <span class="text-muted small">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{{ url_for('cabinet.order_detail', order_id=o.id) }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-eye"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if orders.pages > 1 %}
+        <div class="card-footer">
+          <nav><ul class="pagination mb-0 justify-content-center">
+            {% for p in orders.iter_pages() %}
+              {% if p %}<li class="page-item {% if p == orders.page %}active{% endif %}"><a class="page-link" href="{{ url_for('cabinet.orders', page=p) }}">{{ p }}</a></li>
+              {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+            {% endfor %}
+          </ul></nav>
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="card-body text-center py-5">
+          <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+          <h5>Заявок пока нет</h5>
+          <a href="{{ url_for('main.catalog') }}" class="btn btn-danger mt-2">Перейти в каталог</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

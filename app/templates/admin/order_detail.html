@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Заявка #{{ order.id }} — Панель{% endblock %}
+{% block content %}
+<div class="page-header admin-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('admin.orders') }}">Заявки</a></li><li class="breadcrumb-item active">№{{ order.id }}</li></ol>
+    </nav>
+    <h1 class="page-title">Заявка #{{ order.id }}</h1>
+  </div>
+</div>
+<div class="container py-4">
+  <div class="admin-tabs mb-4">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-tab"><i class="fas fa-home me-1"></i>Дашборд</a>
+    <a href="{{ url_for('admin.orders') }}" class="admin-tab active"><i class="fas fa-list me-1"></i>Заказы</a>
+    <a href="{{ url_for('admin.products') }}" class="admin-tab"><i class="fas fa-box me-1"></i>Товары</a>
+    <a href="{{ url_for('admin.categories') }}" class="admin-tab"><i class="fas fa-tags me-1"></i>Категории</a>
+    <a href="{{ url_for('main.index') }}" class="admin-tab ms-auto"><i class="fas fa-eye me-1"></i>Сайт</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <!-- Items + invoice generation form -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between">
+          <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Позиции заявки</h5>
+          <span class="badge bg-{{ order.status_color }} fs-6">{{ order.status_label }}</span>
+        </div>
+        <form method="post" action="{{ url_for('admin.generate_invoice', order_id=order.id) }}" id="invoiceForm">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead><tr><th>Товар</th><th class="text-center">Кол-во</th><th>Ед.</th><th>Цена (руб.)</th><th class="text-end">Сумма</th></tr></thead>
+              <tbody>
+                {% for item in order.items %}
+                <tr>
+                  <td>{{ item.product_name }}</td>
+                  <td class="text-center">{{ item.quantity }}</td>
+                  <td>{{ item.product_unit }}</td>
+                  <td>
+                    <input type="number" name="price_{{ item.id }}"
+                           class="form-control form-control-sm price-input"
+                           value="{{ item.price_at_order if item.price_at_order else '' }}"
+                           placeholder="Введите цену" step="0.01" min="0" style="min-width:120px">
+                  </td>
+                  <td class="text-end subtotal-cell fw-semibold">
+                    {% if item.price_at_order %}{{ item.subtotal | money }}{% else %}—{% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr class="table-light">
+                  <td colspan="4" class="text-end fw-bold">ИТОГО:</td>
+                  <td class="text-end fw-bold text-danger fs-5" id="grandTotal">{{ order.total_display }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          <div class="p-3 border-top">
+            <label class="form-label fw-semibold">Комментарий менеджера</label>
+            <textarea name="manager_comment" class="form-control mb-3" rows="2" placeholder="Примечание для клиента…">{{ order.manager_comment or '' }}</textarea>
+            <button type="submit" class="btn btn-success btn-lg" onclick="return confirm('Сформировать счёт на оплату и отправить клиенту?')">
+              <i class="fas fa-file-invoice-dollar me-2"></i>Сформировать и отправить счёт
+            </button>
+            {% if order.invoice_pdf_filename %}
+            <div class="alert alert-success mt-3 mb-0">
+              <i class="fas fa-check-circle me-2"></i>Счёт уже сформирован и доступен клиенту в личном кабинете.
+              Нажмите кнопку выше, чтобы пересформировать.
+            </div>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+
+      <!-- Change status -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-exchange-alt me-2"></i>Изменить статус</h5></div>
+        <div class="card-body">
+          <form method="post" action="{{ url_for('admin.order_set_status', order_id=order.id) }}" class="d-flex gap-3 flex-wrap align-items-end">
+            <div>
+              <label class="form-label">Новый статус</label>
+              <select name="status" class="form-select">
+                {% for s, (label, color) in statuses.items() %}
+                <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="flex-grow-1">
+              <label class="form-label">Комментарий</label>
+              <input type="text" name="manager_comment" class="form-control" value="{{ order.manager_comment or '' }}" placeholder="Необязательно">
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar: client info -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm mb-3">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-user me-2"></i>Клиент</h5></div>
+        <div class="card-body">
+          <div class="meta-row"><span>ФИО:</span> {{ order.client_full_name or '—' }}</div>
+          <div class="meta-row"><span>Email:</span> <a href="mailto:{{ order.client_email }}">{{ order.client_email or '—' }}</a></div>
+          <div class="meta-row"><span>Телефон:</span> <a href="tel:{{ order.client_phone }}">{{ order.client_phone or '—' }}</a></div>
+          {% if order.client_company %}<div class="meta-row"><span>Организация:</span> {{ order.client_company }}</div>{% endif %}
+          {% if order.client_inn %}<div class="meta-row"><span>ИНН/КПП:</span> {{ order.client_inn }} / {{ order.client_kpp or '—' }}</div>{% endif %}
+          {% if order.client_legal_address %}<div class="meta-row"><span>Адрес:</span> {{ order.client_legal_address }}</div>{% endif %}
+        </div>
+      </div>
+
+      {% if order.client_bank_name %}
+      <div class="card shadow-sm mb-3">
+        <div class="card-header"><h5 class="mb-0"><i class="fas fa-university me-2"></i>Банк</h5></div>
+        <div class="card-body">
+          <div class="meta-row"><span>Банк:</span> {{ order.client_bank_name }}</div>
+          <div class="meta-row"><span>р/с:</span> {{ order.client_bank_account or '—' }}</div>
+          <div class="meta-row"><span>к/с:</span> {{ order.client_corr_account or '—' }}</div>
+          <div class="meta-row"><span>БИК:</span> {{ order.client_bik or '—' }}</div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if order.comment %}
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <strong><i class="fas fa-comment me-2"></i>Комментарий клиента:</strong>
+          <p class="mt-2 mb-0 text-muted">{{ order.comment }}</p>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="card shadow-sm">
+        <div class="card-body small">
+          <div class="meta-row"><span>Создана:</span> {{ order.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+          <div class="meta-row"><span>Обновлена:</span> {{ order.updated_at.strftime('%d.%m.%Y %H:%M') }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

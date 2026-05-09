@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}Контакты{% endblock %}
+{% block content %}
+<div class="page-header"><div class="container"><h1 class="page-title"><i class="fas fa-map-marker-alt me-2"></i>Контакты</h1></div></div>
+<div class="container py-5">
+  <div class="row g-5 align-items-center">
+    <div class="col-lg-5">
+      <div class="contact-card mb-4">
+        <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+        <div>
+          <h5>Телефоны</h5>
+          <a href="tel:+79178373752" class="d-block">8 917 837-37-52</a>
+          <a href="tel:+74422263696" class="d-block">(8442) 26-36-96</a>
+        </div>
+      </div>
+      <div class="contact-card mb-4">
+        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+        <div>
+          <h5>Email</h5>
+          <a href="mailto:mpbv@yandex.ru">mpbv@yandex.ru</a>
+        </div>
+      </div>
+      <div class="contact-card mb-4">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <div>
+          <h5>Адрес</h5>
+          <p class="mb-0">400074, г. Волгоград,<br>ул. Козака-Заклунного, д.44В, кв.3</p>
+        </div>
+      </div>
+      <div class="contact-card">
+        <div class="contact-icon"><i class="fas fa-clock"></i></div>
+        <div>
+          <h5>Режим работы</h5>
+          <p class="mb-0">Понедельник – Пятница: 9:00 – 18:00<br>Суббота – Воскресенье: выходной</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-7">
+      <div class="card shadow p-4">
+        <h4 class="mb-4">Оставить заявку</h4>
+        <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Для оформления заказа перейдите в <a href="{{ url_for('main.catalog') }}">каталог</a> и добавьте товары в корзину.</div>
+        <div class="row g-3">
+          <div class="col-md-6"><div class="form-floating"><input type="text" class="form-control" placeholder=" "><label>Ваше имя</label></div></div>
+          <div class="col-md-6"><div class="form-floating"><input type="tel" class="form-control" placeholder=" "><label>Телефон</label></div></div>
+          <div class="col-12"><div class="form-floating"><textarea class="form-control" style="height:100px" placeholder=" "></textarea><label>Вопрос или комментарий</label></div></div>
+          <div class="col-12"><button class="btn btn-danger px-4"><i class="fas fa-paper-plane me-2"></i>Отправить</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

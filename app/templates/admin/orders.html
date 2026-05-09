@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Заявки — Панель управления{% endblock %}
+{% block content %}
+<div class="page-header admin-header">
+  <div class="container"><h1 class="page-title"><i class="fas fa-clipboard-list me-2"></i>Заявки</h1></div>
+</div>
+<div class="container py-4">
+  <div class="admin-tabs mb-4">
+    <a href="{{ url_for('admin.dashboard') }}" class="admin-tab"><i class="fas fa-home me-1"></i>Дашборд</a>
+    <a href="{{ url_for('admin.orders') }}" class="admin-tab active"><i class="fas fa-list me-1"></i>Заказы</a>
+    <a href="{{ url_for('admin.products') }}" class="admin-tab"><i class="fas fa-box me-1"></i>Товары</a>
+    <a href="{{ url_for('admin.categories') }}" class="admin-tab"><i class="fas fa-tags me-1"></i>Категории</a>
+    <a href="{{ url_for('main.index') }}" class="admin-tab ms-auto"><i class="fas fa-eye me-1"></i>Сайт</a>
+  </div>
+
+  <!-- Status filter -->
+  <div class="d-flex gap-2 flex-wrap mb-4">
+    <a href="{{ url_for('admin.orders') }}" class="btn btn-sm {% if not active_status %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Все</a>
+    {% for s, (label, color) in statuses.items() %}
+    <a href="{{ url_for('admin.orders', status=s) }}" class="btn btn-sm {% if active_status == s %}btn-{{ color }}{% else %}btn-outline-{{ color }}{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead><tr><th>№</th><th>Клиент</th><th>Дата</th><th>Позиций</th><th>Сумма</th><th>Статус</th><th>Счёт</th><th></th></tr></thead>
+        <tbody>
+          {% for o in orders.items %}
+          <tr>
+            <td><strong>#{{ o.id }}</strong></td>
+            <td>
+              {{ o.client_full_name or o.user.full_name }}
+              {% if o.client_company %}<br><small class="text-muted">{{ o.client_company }}</small>{% endif %}
+            </td>
+            <td>{{ o.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td>{{ o.items|length }}</td>
+            <td>{{ o.total_display }}</td>
+            <td><span class="badge bg-{{ o.status_color }}">{{ o.status_label }}</span></td>
+            <td>
+              {% if o.invoice_pdf_filename %}
+              <i class="fas fa-file-pdf text-danger" title="Счёт сформирован"></i>
+              {% else %}—{% endif %}
+            </td>
+            <td><a href="{{ url_for('admin.order_detail', order_id=o.id) }}" class="btn btn-sm btn-outline-primary">Открыть</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="8" class="text-center text-muted py-4">Заявок нет</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if orders.pages > 1 %}
+    <div class="card-footer">
+      <nav><ul class="pagination mb-0 justify-content-center">
+        {% for p in orders.iter_pages() %}
+          {% if p %}<li class="page-item {% if p == orders.page %}active{% endif %}"><a class="page-link" href="{{ url_for('admin.orders', status=active_status or None, page=p) }}">{{ p }}</a></li>
+          {% else %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+        {% endfor %}
+      </ul></nav>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
