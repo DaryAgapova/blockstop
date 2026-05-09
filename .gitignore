@@ -5,6 +5,5 @@ __pycache__/
 .env
 db.sqlite3
 app/static/uploads/
-app/static/fonts/
 *.zip
 .DS_Store
