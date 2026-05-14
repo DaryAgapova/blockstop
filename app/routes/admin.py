@@ -30,12 +30,8 @@ def allowed_file(filename):
 def save_image(file, subfolder='products'):
     if not file or not allowed_file(file.filename):
         return None
-    ext = file.filename.rsplit('.', 1)[1].lower()
-    filename = f'{uuid.uuid4().hex}.{ext}'
-    upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], subfolder)
-    os.makedirs(upload_dir, exist_ok=True)
-    file.save(os.path.join(upload_dir, filename))
-    return f'{subfolder}/{filename}'
+    from app.utils.cloudinary_upload import upload_image
+    return upload_image(file, folder=f'blockstop/{subfolder}')
 
 
 # ── Dashboard ──────────────────────────────────────────────────────────────────

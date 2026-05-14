@@ -126,7 +126,7 @@
         <div class="product-card">
           <a href="{{ url_for('main.product', product_id=p.id) }}" class="product-card-img-link">
             {% if p.image_filename %}
-            <img src="{{ url_for('main.uploaded_file', filename=p.image_filename) }}" alt="{{ p.name }}" class="product-card-img">
+            <img src="{{ (p.image_filename if p.image_filename and p.image_filename.startswith('http') else url_for('main.uploaded_file', filename=p.image_filename)) }}" alt="{{ p.name }}" class="product-card-img">
             {% else %}
             <div class="product-card-img-placeholder">
               <i class="fas fa-fire-extinguisher"></i>

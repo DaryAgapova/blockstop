@@ -47,7 +47,7 @@
                 <label class="form-label fw-semibold">Изображение</label>
                 {% if product and product.image_filename %}
                 <div class="mb-2">
-                  <img src="{{ url_for('main.uploaded_file', filename=product.image_filename) }}" style="height:100px;border-radius:8px">
+                  <img src="{{ (product.image_filename if product.image_filename and product.image_filename.startswith('http') else url_for('main.uploaded_file', filename=product.image_filename)) }}" style="height:100px;border-radius:8px">
                   <small class="text-muted d-block">Загрузите новое фото, чтобы заменить</small>
                 </div>
                 {% endif %}
