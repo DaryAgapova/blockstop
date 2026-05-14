@@ -68,8 +68,8 @@ def generate_invoice(order, invoice_path):
     header_data = [[
         Paragraph(cfg['COMPANY_NAME'], _style(11, bold=True, color=RED)),
         Paragraph(
-            f'ИНН {cfg["COMPANY_INN"]} / КПП {cfg["COMPANY_KPP"]}\n'
-            f'ОГРН {cfg["COMPANY_OGRN"]}\n'
+            f'ИНН {cfg["COMPANY_INN"]} / КПП {cfg["COMPANY_KPP"]} / ОГРН {cfg["COMPANY_OGRN"]}\n'
+            f'ОКВЭД {cfg.get("COMPANY_OKVD", "")} / ОКПО {cfg.get("COMPANY_OKPO", "")}\n'
             f'{cfg["COMPANY_ADDRESS"]}\n'
             f'Тел.: {cfg["COMPANY_PHONE"]}\n'
             f'Email: {cfg["COMPANY_EMAIL"]}',
@@ -210,10 +210,13 @@ def generate_invoice(order, invoice_path):
     ))
     story.append(Spacer(1, 6*mm))
 
+    director = cfg.get('COMPANY_DIRECTOR', '')
+    accountant = cfg.get('COMPANY_ACCOUNTANT', '')
+    dir_title = cfg.get('COMPANY_DIRECTOR_TITLE', 'Руководитель')
     sig_data = [[
-        Paragraph('Руководитель: ___________________________', _style(8)),
+        Paragraph(f'{dir_title}: _________________ / {director}', _style(8)),
         Paragraph('М.П.', _style(8, align='CENTER')),
-        Paragraph('Бухгалтер: ______________________________', _style(8, align='RIGHT')),
+        Paragraph(f'Бухгалтер: _________________ / {accountant}', _style(8, align='RIGHT')),
     ]]
     sig_tbl = Table(sig_data, colWidths=[W*0.45, W*0.10, W*0.45])
     sig_tbl.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'MIDDLE')]))
