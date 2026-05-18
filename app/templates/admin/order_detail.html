@@ -10,6 +10,13 @@
   </div>
 </div>
 <div class="container py-4">
+  <div class="d-flex justify-content-end mb-2">
+    <form method="post" action="{{ url_for('admin.order_delete', order_id=order.id) }}" onsubmit="return confirm('Удалить заявку #{{ order.id }}? Это действие необратимо.')">
+      <button type="submit" class="btn btn-danger btn-sm">
+        <i class="fas fa-trash me-1"></i>Удалить заявку
+      </button>
+    </form>
+  </div>
   <div class="admin-tabs mb-4">
     <a href="{{ url_for('admin.dashboard') }}" class="admin-tab"><i class="fas fa-home me-1"></i>Дашборд</a>
     <a href="{{ url_for('admin.orders') }}" class="admin-tab active"><i class="fas fa-list me-1"></i>Заказы</a>

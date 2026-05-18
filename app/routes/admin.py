@@ -143,6 +143,16 @@ def generate_invoice(order_id):
     return redirect(url_for('admin.order_detail', order_id=order_id))
 
 
+@admin_bp.route('/orders/<int:order_id>/delete', methods=['POST'])
+@admin_required
+def order_delete(order_id):
+    order = Order.query.get_or_404(order_id)
+    db.session.delete(order)
+    db.session.commit()
+    flash(f'Заявка #{order_id} удалена.', 'success')
+    return redirect(url_for('admin.orders'))
+
+
 # ── Products ───────────────────────────────────────────────────────────────────
 
 @admin_bp.route('/products')
